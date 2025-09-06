@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PomodoroProApp — Beta exclusiva</title>
+
+  <!-- Open Graph / preview -->
+  <meta property="og:title" content="PomodoroProApp — Beta exclusiva" />
+  <meta property="og:description" content="Del caos al foco. Accede a avances exclusivos y a la beta privada." />
+  <meta property="og:image" content="/assets/preview.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <!-- tsParticles (fondo de burbujas) -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js" defer></script>
+  <!-- Lottie para animación del logo (opcional) -->
+  <script src="https://unpkg.com/lottie-web/build/player/lottie.min.js" defer></script>
+</head>
+<body>
+  <!-- INTRO OVERLAY -->
+  <div id="intro" class="intro-overlay">
+    <div class="intro-content">
+      <div class="intro-logo">
+        <img id="introLogoImg" src="assets/logo2.png" alt="PomodoroProApp logo" />
+      </div>
+
+      <div id="typewriter" class="typewriter" aria-live="polite"></div>
+
+      <button id="enterBtn" class="btn-gradient hidden" aria-label="Entrar a la beta">Quiero entrar</button>
+    </div>
+  </div>
+  <!-- canvas de partículas / burbujas -->
+  <div id="tsparticles" class="bg-canvas"></div>
+
+  <main class="hero">
+    <div class="hero-inner">
+      <div id="logoContainer" class="logo-wrap">
+        <div id="logo"></div>
+      </div>
+      <div class="meta-info">
+        <span class="badge-access" aria-hidden="true">ACCESO RESTRINGIDO</span>
+        <span id="spots" class="spots-left" aria-live="polite">Plazas restantes: <strong id="spotsCount">12</strong></span>
+      </div>
+
+      <img src="assets/caos_foco.jpeg" alt="Del caos al foco" class="hero-tagline" />
+      <p class="subtitle">Estás a un paso de transformar tu flujo de trabajo. Consigue acceso prioritario a la beta, funciones secretas y contenido exclusivo para fundadores.</p>
+
+      <div id="mailerlite-embed">
+        <!-- Pegar aquí el HTML/JS que MailerLite te entregue -->
+      </div>
+
+      <!-- Fallback con mejoras "épicas" -->
+      <form id="fallback-form" class="subscribe-card" onsubmit="return false;" novalidate>
+        <div class="form-group">
+          <input type="text" id="name" name="name" placeholder=" " required minlength="2" aria-describedby="form-msg" />
+          <label for="name">Tu nombre</label>
+        </div>
+        <div class="form-group">
+          <input type="email" id="email" name="email" placeholder=" " required aria-describedby="form-msg" />
+          <label for="email">Tu email</label>
+        </div>
+        <button type="submit" class="btn-gradient">
+          <span class="loader"></span>
+          <span class="btn-text">Conseguir mi acceso</span>
+        </button>
+        <p id="form-msg" class="form-msg" aria-live="assertive"></p>
+      </form>
+
+      <small class="note">Solo recibirás correos que aporten valor. Cero spam. Plazas realmente limitadas.</small>
+    </div>
+  </main>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
