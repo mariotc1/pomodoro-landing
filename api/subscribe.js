@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         email,
-        fields: { Nombre: name || "" },
+        fields: { name: name || "" },
         groups: ["164707869286990870"],
         resubscribe: true
       })
