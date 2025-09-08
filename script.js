@@ -176,7 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
           throw new Error(errMsg);
         }
 
-        msg.innerHTML = `¡Genial, <strong>${nameInput.value}</strong>! Revisa tu correo para la confirmación.`;
+        msg.innerHTML = `¡Genial, <strong>${nameInput.value}</strong>! Revisa tu bandeja de entrada para la confirmación.<br>
+        Si no lo ves, mira en la carpeta de <em>Promociones</em> o <em>Spam</em>.`;        
         msg.classList.add('success');
         form.reset();
         nameInput.blur();
