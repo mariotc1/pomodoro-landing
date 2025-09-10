@@ -1,216 +1,344 @@
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function delay(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
 
 document.addEventListener('DOMContentLoaded', () => {
-  // --- TsParticles (sin cambios) ---
-  if (window.tsParticles) {
-    tsParticles.load("tsparticles", {
-      fpsLimit: 60,
-      background: { color: { value: "#000000" } },
-      particles: {
-        number: { value: 30 },
-        color: { value: ["#00d18a", "#00aef0", "#7c4dff"] },
-        shape: { type: "circle" },
-        opacity: { value: { min: 0.1, max: 0.4 } },
-        size: { value: { min: 1, max: 5 } },
-        move: { enable: true, direction: "top", speed: 0.8, outModes: { default: "out" } }
-      },
-      interactivity: { detectsOn: "canvas", events: { onhover: { enable: false }, onclick: { enable: false } } },
-      detectRetina: true
-    });
-  }
+  initializeParticleBackground();
+  initializeIntroSequence();
+  initializeLogoAnimation();
+  initializeSubscriptionForm();
+  initializeParallaxEffect();
+});
 
-  // --- INTRO MEJORADA ---
+function initializeParticleBackground() {
+  if (!window.tsParticles) return;
+
+  const particleConfig = {
+    fpsLimit: 60,
+    background: {
+      color: { value: "#000000" }
+    },
+    particles: {
+      number: { value: 30 },
+      color: { value: ["#00d18a", "#00aef0", "#7c4dff"] },
+      shape: { type: "circle" },
+      opacity: { value: { min: 0.1, max: 0.4 } },
+      size: { value: { min: 1, max: 5 } },
+      move: {
+        enable: true,
+        direction: "top",
+        speed: 0.8,
+        outModes: { default: "out" }
+      }
+    },
+    interactivity: {
+      detectsOn: "canvas",
+      events: {
+        onhover: { enable: false },
+        onclick: { enable: false }
+      }
+    },
+    detectRetina: true
+  };
+
+  tsParticles.load("tsparticles", particleConfig);
+}
+
+function initializeIntroSequence() {
   const intro = document.getElementById('intro');
   const typewriterEl = document.getElementById('typewriter');
   const enterBtn = document.getElementById('enterBtn');
 
-  if (intro && typewriterEl && enterBtn) {
-    const lines = [
-      { text: 'Estás a punto de entrar...' },
-      { text: 'A un lugar donde el caos se convierte en foco' },
-      { text: 'Consigue acceso prioritario a la beta privada', classes: 'gradient-text' },
-      { text: '¿Aceptas la invitación?', classes: 'glitch', effect: 'decode' } 
-    ];
+  if (!intro || !typewriterEl || !enterBtn) return;
 
-    async function typeLine(line, speed = 50) {
-      const p = document.createElement('p');
-      p.className = 'type-line';
-      if (line.classes) p.classList.add(...line.classes.split(' '));
-      p.style.animation = "fadeInUp 0.6s ease both";
-      typewriterEl.appendChild(p);
-      
-      const cursor = document.createElement('span');
-      cursor.className = 'cursor';
-      cursor.innerHTML = '|';
-      p.appendChild(cursor);
+  const introLines = [
+    { text: 'Estás a punto de entrar...' },
+    { text: 'A un lugar donde el caos se convierte en foco' },
+    { text: 'Consigue acceso prioritario a la beta privada', classes: 'gradient-text' },
+    { text: '¿Aceptas la invitación?', classes: 'glitch', effect: 'decode' }
+  ];
 
-      if (line.effect === 'decode') {
-        // Efecto especial para la última línea
-        p.setAttribute('data-text', line.text);
-        for (let i = 0; i < line.text.length; i++) {
-          p.insertBefore(document.createTextNode(line.text[i]), cursor);
-        }
-        await sleep(200);
-        
-        const chars = p.querySelectorAll('span.char');
-        for (const char of chars) {
-            await sleep(30);
-            char.classList.add('decoded');
-        }
-        await sleep(500);
+  async function createTypewriterLine(line, typingSpeed = 50) {
+    const paragraph = document.createElement('p');
+    paragraph.className = 'type-line';
+    
+    if (line.classes) {
+      paragraph.classList.add(...line.classes.split(' '));
+    }
+    
+    paragraph.style.animation = "fadeInUp 0.6s ease both";
+    typewriterEl.appendChild(paragraph);
 
-      } else {
-        // Escritura normal
-        for (let i = 0; i < line.text.length; i++) {
-          cursor.before(line.text.charAt(i));
-          await sleep(speed);
-        }
-      }
-      
-      await sleep(400);
-      cursor.classList.add('hidden'); // Ocultar cursor al final de la línea
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    cursor.innerHTML = '|';
+    paragraph.appendChild(cursor);
+
+    if (line.effect === 'decode') {
+      await createDecodeEffect(paragraph, line.text, cursor);
+    } else {
+      await typeTextNormally(paragraph, line.text, cursor, typingSpeed);
     }
 
-    async function runIntro() {
-      await sleep(900);
-      for (const line of lines) {
-        await typeLine(line);
-      }
-      await sleep(300);
-      
-      enterBtn.classList.remove('hidden');
-      enterBtn.classList.add('show');
+    await delay(400);
+    cursor.classList.add('hidden');
+  }
+
+  async function createDecodeEffect(paragraph, text, cursor) {
+    paragraph.setAttribute('data-text', text);
+    
+    for (let i = 0; i < text.length; i++) {
+      paragraph.insertBefore(document.createTextNode(text[i]), cursor);
     }
-
-    enterBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      intro.classList.add('fade-out');
-      setTimeout(() => {
-        try { intro.remove(); } catch (e) {}
-        document.body.style.overflow = 'auto'; // Permitir scroll
-        const nameInput = document.getElementById('name');
-        if (nameInput) {
-          nameInput.focus();
-          nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        animateSpots();
-      }, 360);
-    });
-
-    runIntro().catch((err) => { console.error('Intro failed', err); });
-  }
-
-  // --- ANIMACIÓN DE PLAZAS (sin cambios) ---
-  function animateSpots() {
-    const spotsCountEl = document.getElementById('spotsCount');
-    if (!spotsCountEl) return;
     
-    let currentSpots = 25;
-    const finalSpots = 12;
+    await delay(200);
     
-    const interval = setInterval(() => {
-      spotsCountEl.textContent = currentSpots;
-      if (currentSpots > finalSpots) {
-        currentSpots--;
-      } else {
-        clearInterval(interval);
-        spotsCountEl.parentElement.style.animation = 'pulseSpots 2s ease-in-out infinite';
-      }
-    }, 80);
+    const characters = paragraph.querySelectorAll('span.char');
+    for (const character of characters) {
+      await delay(30);
+      character.classList.add('decoded');
+    }
+    
+    await delay(500);
   }
 
-  // --- CARGA DEL LOGO (sin cambios) ---
-  const logoEl = document.getElementById('logo');
-  if (logoEl) {
-    fetch('assets/logo.json', { method: 'HEAD' }).then(res => {
-      if (res.ok && window.lottie) {
-        lottie.loadAnimation({ container: logoEl, path: 'assets/logo.json', renderer: 'svg', loop: true, autoplay: true });
-      } else {
-        logoEl.innerHTML = '<img src="assets/logo2.png" alt="PomodoroProApp" />';
-      }
-    }).catch(() => {
-      logoEl.innerHTML = '<img src="assets/logo2.png" alt="PomodoroProApp" />';
-    });
+  async function typeTextNormally(paragraph, text, cursor, speed) {
+    for (let i = 0; i < text.length; i++) {
+      cursor.before(text.charAt(i));
+      await delay(speed);
+    }
   }
 
-  // --- FORMULARIO DE SUSCRIPCIÓN "ÉPICO" ---
-  const fallbackForm = document.getElementById('fallback-form');
-  if (fallbackForm) {
-    fallbackForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const nameInput = document.getElementById('name');
-      const emailInput = document.getElementById('email');
-      const msg = document.getElementById('form-msg');
-      const button = form.querySelector('button');
-      
-      // limpiar estados previos
-      msg.textContent = '';
-      msg.className = 'form-msg';
-      nameInput.classList.remove('is-invalid');
-      emailInput.classList.remove('is-invalid');
+  async function runIntroAnimation() {
+    await delay(900);
+    
+    for (const line of introLines) {
+      await createTypewriterLine(line);
+    }
+    
+    await delay(300);
+    enterBtn.classList.remove('hidden');
+    enterBtn.classList.add('show');
+  }
 
-      if (!form.checkValidity()) {
-        msg.textContent = 'Por favor, rellena los campos correctamente.';
-        msg.classList.add('error');
-        if (!nameInput.validity.valid) nameInput.classList.add('is-invalid');
-        if (!emailInput.validity.valid) emailInput.classList.add('is-invalid');
-        return;
-      }
-
-      button.disabled = true;
-      button.dataset.loading = true;
-
+  function handleEnterButtonClick(event) {
+    event.preventDefault();
+    intro.classList.add('fade-out');
+    
+    setTimeout(() => {
       try {
-        // Send the subscriber to our serverless endpoint (/api/subscribe)
-        const response = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: nameInput.value, email: emailInput.value })
-        });
-
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          console.error('Server subscribe error', result);
-          const errMsg = (result && (result.error || result.message)) ? (result.error || result.message) : 'Error en el servidor';
-          throw new Error(errMsg);
-        }
-
-        msg.innerHTML = `¡Genial, <strong>${nameInput.value}</strong>! Revisa tu bandeja de entrada para la confirmación.<br>
-        Si no lo ves, mira en la carpeta de <em>Promociones</em> o <em>Spam</em>.`;        
-        msg.classList.add('success');
-        form.reset();
-        nameInput.blur();
-        emailInput.blur();
-
+        intro.remove();
       } catch (error) {
-        console.error('Subscription failed:', error);
-        // show a clearer message to the user
-        let userMsg = 'Algo salió mal. Inténtalo de nuevo.';
-        if (error && error.message) {
-          // If server returned a readable message, show a friendly version
-          if (error.message.includes('Missing email')) userMsg = 'Introduce un email válido.';
-        }
-        msg.textContent = userMsg;
-        msg.classList.add('error');
-      } finally {
-        button.disabled = false;
-        button.dataset.loading = false;
+        console.error('Error removing intro:', error);
       }
-    });
+      
+      document.body.style.overflow = 'auto';
+      focusOnNameInput();
+      animateAvailableSpots();
+    }, 360);
   }
 
-  // --- EFECTO PARALLAX SUTIL ---
-  const heroInner = document.querySelector('.hero-inner');
-  if (heroInner) {
-    document.body.addEventListener('mousemove', (e) => {
-      const { clientX, clientY } = e;
-      const { innerWidth, innerHeight } = window;
-      
-      const x = (clientX - innerWidth / 2) / (innerWidth / 2);
-      const y = (clientY - innerHeight / 2) / (innerHeight / 2);
-      
-      heroInner.style.transform = `rotateY(${x * 3}deg) rotateX(${-y * 3}deg)`;
-    });
+  function focusOnNameInput() {
+    const nameInput = document.getElementById('name');
+    if (nameInput) {
+      nameInput.focus();
+      nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
-});
+
+  enterBtn.addEventListener('click', handleEnterButtonClick);
+  runIntroAnimation().catch(error => console.error('Intro animation failed:', error));
+}
+
+function animateAvailableSpots() {
+  const spotsCountElement = document.getElementById('spotsCount');
+  if (!spotsCountElement) return;
+
+  let currentSpots = 25;
+  const finalSpots = 12;
+
+  const countdownInterval = setInterval(() => {
+    spotsCountElement.textContent = currentSpots;
+    
+    if (currentSpots > finalSpots) {
+      currentSpots--;
+    } else {
+      clearInterval(countdownInterval);
+      spotsCountElement.parentElement.style.animation = 'pulseSpots 2s ease-in-out infinite';
+    }
+  }, 80);
+}
+
+function initializeLogoAnimation() {
+  const logoElement = document.getElementById('logo');
+  if (!logoElement) return;
+
+  function loadLottieAnimation() {
+    if (window.lottie) {
+      lottie.loadAnimation({
+        container: logoElement,
+        path: 'assets/logo.json',
+        renderer: 'svg',
+        loop: true,
+        autoplay: true
+      });
+    } else {
+      showFallbackLogo();
+    }
+  }
+
+  function showFallbackLogo() {
+    logoElement.innerHTML = '<img src="assets/logo2.png" alt="PomodoroProApp" />';
+  }
+
+  fetch('assets/logo.json', { method: 'HEAD' })
+    .then(response => {
+      if (response.ok) {
+        loadLottieAnimation();
+      } else {
+        showFallbackLogo();
+      }
+    })
+    .catch(() => {
+      showFallbackLogo();
+    });
+}
+
+function initializeSubscriptionForm() {
+  const subscriptionForm = document.getElementById('fallback-form');
+  if (!subscriptionForm) return;
+
+  async function handleFormSubmission(event) {
+    event.preventDefault();
+    
+    const formElements = getFormElements(event.target);
+    clearPreviousFormState(formElements);
+
+    if (!validateForm(formElements)) {
+      return;
+    }
+
+    setLoadingState(formElements.button, true);
+
+    try {
+      await submitSubscription(formElements);
+      showSuccessMessage(formElements);
+    } catch (error) {
+      showErrorMessage(formElements, error);
+    } finally {
+      setLoadingState(formElements.button, false);
+    }
+  }
+
+  function getFormElements(form) {
+    return {
+      form: form,
+      nameInput: document.getElementById('name'),
+      emailInput: document.getElementById('email'),
+      messageElement: document.getElementById('form-msg'),
+      button: form.querySelector('button')
+    };
+  }
+
+  function clearPreviousFormState(elements) {
+    elements.messageElement.textContent = '';
+    elements.messageElement.className = 'form-msg';
+    elements.nameInput.classList.remove('is-invalid');
+    elements.emailInput.classList.remove('is-invalid');
+  }
+
+  function validateForm(elements) {
+    if (!elements.form.checkValidity()) {
+      elements.messageElement.textContent = 'Por favor, rellena los campos correctamente.';
+      elements.messageElement.classList.add('error');
+      
+      if (!elements.nameInput.validity.valid) {
+        elements.nameInput.classList.add('is-invalid');
+      }
+      
+      if (!elements.emailInput.validity.valid) {
+        elements.emailInput.classList.add('is-invalid');
+      }
+      
+      return false;
+    }
+    
+    return true;
+  }
+
+  function setLoadingState(button, isLoading) {
+    button.disabled = isLoading;
+    button.dataset.loading = isLoading;
+  }
+
+  async function submitSubscription(elements) {
+    const subscriptionData = {
+      name: elements.nameInput.value,
+      email: elements.emailInput.value
+    };
+
+    const response = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subscriptionData)
+    });
+
+    const result = await response.json().catch(() => ({}));
+    
+    if (!response.ok) {
+      console.error('Server subscription error:', result);
+      const errorMessage = result?.error || result?.message || 'Error en el servidor';
+      throw new Error(errorMessage);
+    }
+
+    return result;
+  }
+
+  function showSuccessMessage(elements) {
+    const userName = elements.nameInput.value;
+    elements.messageElement.innerHTML = `
+      ¡Genial, <strong>${userName}</strong>! Revisa tu bandeja de entrada para la confirmación.<br>
+      Si no lo ves, mira en la carpeta de <em>Promociones</em> o <em>Spam</em>.
+    `;
+    elements.messageElement.classList.add('success');
+    elements.form.reset();
+    elements.nameInput.blur();
+    elements.emailInput.blur();
+  }
+
+  function showErrorMessage(elements, error) {
+    console.error('Subscription failed:', error);
+    
+    let userMessage = 'Algo salió mal. Inténtalo de nuevo.';
+    
+    if (error?.message?.includes('Missing email')) {
+      userMessage = 'Introduce un email válido.';
+    }
+    
+    elements.messageElement.textContent = userMessage;
+    elements.messageElement.classList.add('error');
+  }
+
+  subscriptionForm.addEventListener('submit', handleFormSubmission);
+}
+
+function initializeParallaxEffect() {
+  const heroInner = document.querySelector('.hero-inner');
+  if (!heroInner) return;
+
+  function handleMouseMovement(event) {
+    const { clientX, clientY } = event;
+    const { innerWidth, innerHeight } = window;
+
+    const normalizedX = (clientX - innerWidth / 2) / (innerWidth / 2);
+    const normalizedY = (clientY - innerHeight / 2) / (innerHeight / 2);
+
+    const rotationIntensity = 3;
+    const rotateY = normalizedX * rotationIntensity;
+    const rotateX = -normalizedY * rotationIntensity;
+
+    heroInner.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+  }
+
+  document.body.addEventListener('mousemove', handleMouseMovement);
+}
