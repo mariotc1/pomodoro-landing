@@ -121,22 +121,33 @@ function initializeIntroSequence() {
     enterBtn.classList.add('show');
   }
 
-  function handleEnterButtonClick(event) {
-    event.preventDefault();
-    intro.classList.add('fade-out');
-    
-    setTimeout(() => {
-      try {
-        intro.remove();
-      } catch (error) {
-        console.error('Error removing intro:', error);
-      }
-      
-      document.body.style.overflow = 'auto';
-      focusOnNameInput();
-      animateAvailableSpots();
-    }, 360);
+function handleEnterButtonClick(event) {
+  event.preventDefault();
+  
+  const hero = document.querySelector('.hero'); 
+  const intro = document.getElementById('intro');
+
+  document.body.classList.add('transitioning');
+  intro.classList.add('fade-out');
+  
+  if (hero) {
+    hero.classList.add('zoom-in');
   }
+  
+  setTimeout(() => {
+    try {
+      intro.remove();
+    } catch (error) {
+      console.error('Error removing intro:', error);
+    }
+    
+    document.body.style.overflow = 'auto';
+    document.body.classList.remove('transitioning');
+
+    focusOnNameInput();
+    animateAvailableSpots();
+  }, 700);
+}
 
   function focusOnNameInput() {
     const nameInput = document.getElementById('name');

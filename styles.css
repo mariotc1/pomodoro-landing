@@ -292,11 +292,6 @@ body{
   transition:opacity 320ms ease
 }
 
-.intro-overlay.fade-out{
-  opacity:0;
-  pointer-events:none
-}
-
 .intro-content{
   text-align:center;
   padding:28px;
@@ -483,4 +478,31 @@ body{
   .form-group,.form-group input{width:100%}
   .btn-gradient{width:100%}
   .meta-info{flex-direction:column}
+}
+
+body.transitioning {
+  overflow: hidden;
+}
+
+.intro-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-in; 
+}
+
+.hero.zoom-in {
+  animation: zoomInEffect 700ms cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes zoomInEffect {
+  from {
+    transform: scale(0.8) translateZ(-100px);
+    opacity: 0;
+    filter: blur(10px);
+  }
+  to {
+    transform: scale(1) translateZ(0);
+    opacity: 1;
+    filter: blur(0);
+  }
 }
